@@ -1,0 +1,2 @@
+D:\mingw-w64\i686-8.1.0-posix-dwarf-rt_v6-rev0\mingw32\bin\ar.exe qc ..\lib\libgtest.a CMakeFiles/gtest.dir/gtest-all.cc.obj CMakeFiles/gtest.dir/__/src/Executor.cpp.obj CMakeFiles/gtest.dir/__/src/Table.cpp.obj
+D:\mingw-w64\i686-8.1.0-posix-dwarf-rt_v6-rev0\mingw32\bin\ranlib.exe ..\lib\libgtest.a
