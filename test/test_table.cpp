@@ -22,7 +22,7 @@ TEST(Table, can_insert) {
     ASSERT_NO_THROW(table.insert("a", 1.0));
     ASSERT_NO_THROW(table.insert("a", 1.0));
 }
-TEST(Table, can_delete) {
+TEST(Table, can_erase) {
     Table<float> table;
     table.insert("c", 1.0);
     table.insert("d", 1.0);
@@ -40,7 +40,7 @@ TEST(Table, can_delete) {
     ASSERT_NO_THROW(table.erase("b"));
     ASSERT_NO_THROW(table.erase("b"));
 }
-TEST(Table, can_take_elem) {
+TEST(Table, can_get) {
     Table<float> table;
 
     table.insert("c", 1.0);
@@ -52,9 +52,41 @@ TEST(Table, can_take_elem) {
     table.insert("b", 7.0);
     table.insert("a", 8.0);
 
-    EXPECT_EQ(1.0, table["c"]);
-    EXPECT_EQ(2.0, table["d"]);
-    EXPECT_EQ(8.0, table["a"]);
-    EXPECT_EQ(5.0, table["h"]);
-    EXPECT_EQ(2.0, table["d"]);
+    ASSERT_NO_THROW(table.at("c"));
+    ASSERT_NO_THROW(table.at("d"));
+    ASSERT_NO_THROW(table.at("a"));
+    ASSERT_NO_THROW(table.at("h"));
+    ASSERT_NO_THROW(table.at("d"));
+}
+TEST(Table, at_throws_when_not_found) {
+    Table<float> table;
+
+    table.insert("c", 1.0);
+    table.insert("d", 2.0);
+    table.insert("f", 3.0);
+    table.insert("e", 4.0);
+    table.insert("h", 5.0);
+    table.insert("g", 6.0);
+    table.insert("b", 7.0);
+    table.insert("a", 9.0);
+
+    ASSERT_ANY_THROW(std::cout << table.at("z"));
+}
+TEST(Table, insert_and_get) {
+    Table<float> table;
+
+    table.insert("c", 1.0);
+    table.insert("d", 2.0);
+    table.insert("f", 3.0);
+    table.insert("e", 4.0);
+    table.insert("h", 5.0);
+    table.insert("g", 6.0);
+    table.insert("b", 7.0);
+    table.insert("a", 8.0);
+
+    EXPECT_EQ(1.0, table.at("c"));
+    EXPECT_EQ(2.0, table.at("d"));
+    EXPECT_EQ(8.0, table.at("a"));
+    EXPECT_EQ(5.0, table.at("h"));
+    EXPECT_EQ(2.0, table.at("d"));
 }
