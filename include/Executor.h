@@ -6,11 +6,9 @@
 #define TRANSLATOR_EXECUTOR_H
 
 
-
 class Executor {
-
+private:
 };
-
 
 
 #endif //TRANSLATOR_EXECUTOR_H
