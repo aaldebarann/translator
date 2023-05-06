@@ -40,6 +40,11 @@ TEST(Table, can_erase) {
     ASSERT_NO_THROW(table.erase("b"));
     ASSERT_NO_THROW(table.erase("b"));
 }
+TEST(Table, can_erase_key_not_found) {
+    Table<float> table;
+    table.insert("c", 1.0);
+    ASSERT_NO_THROW(table.erase("strange key"));
+}
 TEST(Table, can_get) {
     Table<float> table;
 
@@ -71,6 +76,8 @@ TEST(Table, at_throws_when_not_found) {
     table.insert("a", 9.0);
 
     ASSERT_ANY_THROW(std::cout << table.at("z"));
+    ASSERT_ANY_THROW(std::cout << table.at("x"));
+    ASSERT_ANY_THROW(std::cout << table.at("aa"));
 }
 TEST(Table, insert_and_get) {
     Table<float> table;
@@ -89,4 +96,13 @@ TEST(Table, insert_and_get) {
     EXPECT_EQ(8.0, table.at("a"));
     EXPECT_EQ(5.0, table.at("h"));
     EXPECT_EQ(2.0, table.at("d"));
+    EXPECT_EQ(7.0, table.at("b"));
+}
+TEST(Table, insert_rewrites_value) {
+
+    Table<float> table;
+    table.insert("a", 1.0);
+    table.insert("a", -1.0);
+
+    EXPECT_EQ(-1.0, table.at("a"));
 }
