@@ -12,142 +12,91 @@ class Table {
 private:
     struct Node
     {
-        string name;
-        T data;
-        Node() {
-            name = " ";
-            data = 0.0;
+        string key;
+        T value;
+        Node(const string& key, const T& value) {
+            this->key = key;
+            this->value = value;
         }
+        Node() {
+            this->key = "default-key";
+        };
     };
     
-    Node* dataMas;
-    int* keyMas;
-    int marker;
-    void repack() {
-        int i=0;
-        int j = 0;
-        while (j < marker) {
-            i = j + 1;
-            while (i < marker + 1) {
-                int p = comparison(dataMas[keyMas[j]].name, dataMas[keyMas[i]].name);
-                switch (p)
-                {
-                    case 0:
-                        i++;
-                        continue;
-                    case 1:
-                        std::swap(keyMas[j], keyMas[i]);
-                        i++;
-                        continue;
-                    case -1:
-                        i++;
-                        continue;
-                    default:
-                        continue;
-                }
+    Node* nodes;
+    size_t size;
+    size_t capacity;
+
+    size_t upper_bound(const string& key) {
+        size_t res = size;
+        int l = 0, r = size;
+        while (l <= r) {
+            int c = (l + r) / 2;
+            if (c == 0 || nodes[c - 1].key <= key) {
+                res = c;
+                l = c + 1;
+            } else {
+                r = c - 1;
             }
-            j++;
         }
-
-    }
-    int comparison(string one, string tow) {
-        const char* s = &one[0];
-        const char* f = &tow[0];
-
-        if (s < f == 0) {
-            return 0;
+        return res;
+    } // returns position of the first element greater than the given key (may be out of range)
+    void reserve(size_t newCap) {
+        Node* newNodes = new Node[newCap];
+        for(size_t i = 0; i < newCap && i < capacity; i++) {
+            newNodes[i] = nodes[i];
         }
-        if (s > f) {//str1 áîëüøå, ÷åì str2
-            return 1;
-        }
-        if (s < f) { //str1 ìåíüøå, ÷åì str2
-            return -1;
-        }
-    }
+        std::swap(newNodes, nodes);
+        delete[] newNodes;
+        capacity = newCap;
+    } // changes capacity
 
 public:
     Table() {
-        marker = -1;
-        dataMas = new Node[1];
-        keyMas = new int[1];
+        size = 0;
+        capacity = 16;
+        nodes = new Node[capacity];
     }
+
     void insert(const string& key, const T& value) {
-        Node val;
-        val.name = key;
-        val.data = value;
-        if (marker == -1) {
-            marker = 0;
-            dataMas[marker] = val;
-            keyMas[marker] = marker;
-        }
-        else {
-            if (search(val.name) == marker + 1) {
-                if ((marker == int(sizeof(dataMas)) / 4) || marker == 0) {
-                    Node* tmp = new Node[int(sizeof(dataMas)) * 2];
-                    int* tm = new int[int(sizeof(keyMas)) * 2];
-                    for (int i = 0; i <= marker; i++) {
-                        tmp[i] = dataMas[i];
-                        tm[i] = keyMas[i];
-                    }
-                    delete[]dataMas;
-                    dataMas = tmp;
-                    delete[]keyMas;
-                    keyMas = tm;
-                }
-                dataMas[++marker] = val;
-                keyMas[marker] = marker;
-                repack();
-            }
-            else {
-                dataMas[keyMas[search(val.name)]] = val;
-            }
+        size_t pos = upper_bound(key);
+        if(pos - 1 >= 0 && nodes[pos - 1].key == key) {
+            // element was found
+            nodes[pos - 1].value = value;
+        } else {
+            // element was not found
+            if(size == capacity)
+                reserve(capacity * 2);
+            for(size_t i = size + 1; i > pos; i--)
+                nodes[i] = nodes[i - 1];
+            nodes[pos].key = key;
+            nodes[pos].value = value;
+            size++;
         }
 
-    }
+    } // если такой ключ уже существует, значение элемента будет перезаписано
     void erase(const string& key) {
-        int i = search(key);
-        if(marker != -1){
-            if (i == marker) {
-                marker--;
-            }
-            else {
-                while (i < marker) {
-                    dataMas[keyMas[i]] = dataMas[keyMas[i + 1]];
-                    keyMas[i] = keyMas[i + 1];
-                    i++;
-                }
-                marker--;
-            }
+        size_t pos = upper_bound(key);
+        if(pos - 1 >= 0 && nodes[pos - 1].key == key) {
+            // element was found
+            for(size_t i = pos - 1; i < size; i++)
+                nodes[i] = nodes[i + 1];
+            size--;
         }
-    }
-    int search(const string& key) {
-        int l = 0;
-        int r = marker;
-        int mid;
-        while (l <= r) {
-            mid = (l + r) / 2;
-            if (comparison(dataMas[keyMas[mid]].name, key) == 0) return mid;
-            if (comparison(dataMas[keyMas[mid]].name, key) == 1) r = mid - 1;
-            else l = mid + 1;
-        }
-        return marker + 1;
-
-
-    }
-    T& at(const string& key) {
-        if (search(key) == marker + 1) {
-            // вызвать окно (такого элемента в таблице нет)
-            string message("variable was not found: " + key);
-            throw std::out_of_range(message);
-        }
-        return dataMas[keyMas[search(key)]].data;
+    } // removes the element (if one exists)
+    T at(const string& key) {
+        size_t pos = upper_bound(key);
+        if(pos - 1 >= 0 && nodes[pos - 1].key == key)
+            return nodes[pos - 1].value;
+        else
+            throw std::out_of_range("key was not found");
     }
     void print() {
         int i = 0;
-        while (i <= marker) {
+        while (i < size) {
             std::cout << "------------------------------------" << std::endl;
-            std::cout << dataMas[keyMas[i]].name << " | ";
-            dataMas[keyMas[i]].data.print();
+            std::cout << nodes[i].key << " | ";
+            nodes[i].value.print();
             std::cout << std::endl;
             i++;
         }
@@ -155,8 +104,8 @@ public:
     string print_() {
         int i = 0;
         string str;
-        while (i <= marker) {
-            str+= (dataMas[keyMas[i]].name + "  " + dataMas[keyMas[i]].data.to_string()+ "| ");
+        while (i < size) {
+            str+= (nodes[i].key + "  " + nodes[i].value.to_string() + "| ");
             i++;
         }
         return str;
