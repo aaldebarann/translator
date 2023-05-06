@@ -4,6 +4,8 @@
 
 #ifndef TRANSLATOR_TABLE_H
 #define TRANSLATOR_TABLE_H
+#include <string>
+using std::string;
 
 template <typename T>
 class Table {
@@ -14,11 +16,7 @@ private:
         T data;
         Node() {
             name = " ";
-            data = T("0");
-        }
-        bool is_zero(){
-            auto p = T("0");
-            return (name == " ")&&(data == p);
+            data = 0.0;
         }
     };
     
@@ -38,7 +36,7 @@ private:
                         i++;
                         continue;
                     case 1:
-                        swap(keyMas[j], keyMas[i]);
+                        std::swap(keyMas[j], keyMas[i]);
                         i++;
                         continue;
                     case -1:
@@ -56,24 +54,27 @@ private:
         const char* s = &one[0];
         const char* f = &tow[0];
 
-        if (strcmp(s, f) == 0) {
+        if (s < f == 0) {
             return 0;
         }
-        if (strcmp(s, f) > 0) {//str1 áîëüøå, ÷åì str2
+        if (s > f) {//str1 áîëüøå, ÷åì str2
             return 1;
         }
-        if (strcmp(s, f) < 0) { //str1 ìåíüøå, ÷åì str2
+        if (s < f) { //str1 ìåíüøå, ÷åì str2
             return -1;
         }
     }
 
 public:
-    OrderedTB() {
+    Table() {
         marker = -1;
         dataMas = new Node[1];
         keyMas = new int[1];
     }
-    void insert(Node val) {
+    void insert(const string& key, const T& value) {
+        Node val;
+        val.name = key;
+        val.data = value;
         if (marker == -1) {
             marker = 0;
             dataMas[marker] = val;
@@ -103,8 +104,8 @@ public:
         }
 
     }
-    void del(string name) {
-        int i = search(name);
+    void erase(const string& key) {
+        int i = search(key);
         if(marker != -1){
             if (i == marker) {
                 marker--;
@@ -119,34 +120,35 @@ public:
             }
         }
     }
-    int search(string name) {
+    int search(const string& key) {
         int l = 0;
         int r = marker;
         int mid;
         while (l <= r) {
             mid = (l + r) / 2;
-            if (comparison(dataMas[keyMas[mid]].name, name) == 0) return mid;
-            if (comparison(dataMas[keyMas[mid]].name, name) == 1) r = mid-1;
+            if (comparison(dataMas[keyMas[mid]].name, key) == 0) return mid;
+            if (comparison(dataMas[keyMas[mid]].name, key) == 1) r = mid - 1;
             else l = mid + 1;
         }
         return marker + 1;
 
 
     }
-    T takeElem(string name) {
-        if (search(name) == marker + 1) {
+    T& at(const string& key) {
+        if (search(key) == marker + 1) {
             // вызвать окно (такого элемента в таблице нет)
-            string message("variable was not found: "+name);
-            throw invalid_argument(message);
+            string message("variable was not found: " + key);
+            throw std::out_of_range(message);
         }
-        return T(dataMas[keyMas[search(name)]].data); }
+        return dataMas[keyMas[search(key)]].data;
+    }
     void print() {
         int i = 0;
         while (i <= marker) {
-            cout << "------------------------------------" << endl;
-            cout << dataMas[keyMas[i]].name << " | ";
+            std::cout << "------------------------------------" << std::endl;
+            std::cout << dataMas[keyMas[i]].name << " | ";
             dataMas[keyMas[i]].data.print();
-            cout << endl;
+            std::cout << std::endl;
             i++;
         }
     }
@@ -159,6 +161,7 @@ public:
         }
         return str;
     }
+
 };
 
 
